@@ -26,14 +26,12 @@ class Elasticsearch < Formula
       s.gsub! /#\s*cluster\.name\: elasticsearch/, "cluster.name: #{cluster_name}"
 
       # 2. Configure paths
-      s.gsub! /#\s*path\.data\: [^\n]+/, "path.data: #{var}/elasticsearch/"
-      s.gsub! /#\s*path\.logs\: [^\n]+/, "path.logs: #{var}/log/elasticsearch/"
+      s.sub! "# path.data: /path/to/data", "path.data: #{var}/elasticsearch/"
+      s.sub! "# path.logs: /path/to/logs", "path.logs: #{var}/log/elasticsearch/"
+      s.sub! "# path.plugins: /path/to/plugins", "path.plugins: #{var}/lib/elasticsearch/plugins"
 
       # 3. Bind to loopback IP for laptops roaming different networks
       s.gsub! /#\s*network\.host\: [^\n]+/, "network.host: 127.0.0.1"
-
-      # 4. Persist plugins on upgrade
-      s.gsub! "# path.plugins: /path/to/plugins", "path.plugins: #{var}/lib/elasticsearch/plugins"
     end
 
     inreplace "#{bin}/elasticsearch.in.sh" do |s|
