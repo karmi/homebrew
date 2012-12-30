@@ -50,20 +50,15 @@ class Elasticsearch < Formula
   end
 
   def caveats; <<-EOS.undent
-    If upgrading from 0.18 ElasticSearch requires flushing before shutting
-    down the cluster with no indexing operations happening after flush:
-        curl host:9200/_flush
+    Elasticsearch was installed in #{prefix}.
 
-    See the 'elasticsearch.yml' file for configuration options.
+    The log files location: #{var}/log/elasticsearch/#{cluster_name}.log
+    The data directory:     #{var}/elasticsearch/#{cluster_name}/
+    Plugins location:       #{var}/lib/elasticsearch/plugins/
 
-    You'll find the ElasticSearch log here:
-        open #{var}/log/elasticsearch/#{cluster_name}.log
-
-    The folder with cluster data is here:
-        open #{var}/elasticsearch/#{cluster_name}/
-
-    You should see ElasticSearch running:
-        open http://localhost:9200/
+    To start Elasticsearch manually:
+      elasticsearch -f -D es.config=#{prefix}/config/elasticsearch.yml
+      open http://localhost:9200
     EOS
   end
 
