@@ -22,7 +22,6 @@ class Elasticsearch < Formula
 
     # Set up ElasticSearch for local development:
     inreplace "#{prefix}/config/elasticsearch.yml" do |s|
-
       # 1. Give the cluster a unique name
       s.gsub! /#\s*cluster\.name\: elasticsearch/, "cluster.name: #{cluster_name}"
 
@@ -35,24 +34,20 @@ class Elasticsearch < Formula
 
       # 4. Persist plugins on upgrade
       s.gsub! "# path.plugins: /path/to/plugins", "path.plugins: #{var}/lib/elasticsearch/plugins"
-
     end
 
     inreplace "#{bin}/elasticsearch.in.sh" do |s|
-      # Replace CLASSPATH paths to use libexec instead of lib
+      # Configure ES_HOME
+      s.sub!  /#\!\/bin\/sh\n/, "#!/bin/sh\n\nES_HOME=#{prefix}"
+      # Configure ES_CLASSPATH paths to use libexec instead of lib
       s.gsub! /ES_HOME\/lib\//, "ES_HOME/libexec/"
     end
 
-    inreplace "#{bin}/elasticsearch" do |s|
-      # Set ES_HOME to prefix value
-      s.gsub! /^ES_HOME=.*$/, "ES_HOME=#{prefix}"
-    end
-
     inreplace "#{bin}/plugin" do |s|
-      # Set ES_HOME to prefix value
-      s.gsub! /^ES_HOME=.*$/, "ES_HOME=#{prefix}"
-      # Replace CLASSPATH paths to use libexec instead of lib
-      s.gsub! /-cp \".*\"/, '-cp "$ES_HOME/libexec/*"'
+      # Add the proper ES_CLASSPATH configuration
+      s.sub!  /SCRIPT="\$0"/, %Q|SCRIPT="$0"\nES_CLASSPATH=#{prefix}/libexec|
+      # Replace paths to use libexec instead of lib
+      s.gsub! /\$ES_HOME\/lib\//, "$ES_CLASSPATH/"
     end
   end
 
