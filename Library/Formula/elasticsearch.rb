@@ -12,11 +12,12 @@ class Elasticsearch < Formula
   def install
     # Remove Windows files
     rm_f Dir["bin/*.bat"]
-    # Move JARs from lib to libexec according to homebrew conventions
-    libexec.install Dir['lib/*.jar']
-    (libexec+'sigar').install Dir['lib/sigar/*.jar']
 
-    # Install everything directly into folder
+    # Move libraries to `libexec` directory
+    libexec.install Dir['lib/*.jar']
+    (libexec/'sigar').install Dir['lib/sigar/*.{jar,dylib}']
+
+    # Install everything else into package directory
     prefix.install Dir['*']
 
     # Set up ElasticSearch for local development:
