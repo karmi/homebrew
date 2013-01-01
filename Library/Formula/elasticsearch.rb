@@ -2,14 +2,23 @@ require 'formula'
 
 class Elasticsearch < Formula
   homepage 'http://www.elasticsearch.org'
-  url 'http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.2.tar.gz'
-  sha1 '9bedb3638e4fc5a53e264aab3c5ff1a345f22bab'
+  url      'http://download.elasticsearch.org/elasticsearch/elasticsearch/elasticsearch-0.20.2.tar.gz'
+  sha1     '9bedb3638e4fc5a53e264aab3c5ff1a345f22bab'
+  head     'https://github.com/elasticsearch/elasticsearch.git'
+
+  depends_on 'maven' if build.head?
 
   def cluster_name
     "elasticsearch_#{ENV['USER']}"
   end
 
   def install
+    # Build the source for HEAD version
+    if build.head?
+      system "mvn clean package -DskipTests"
+      system "tar --strip 1 -xzf target/releases/elasticsearch-*.tar.gz"
+    end
+
     # Remove Windows files
     rm_f Dir["bin/*.bat"]
 
@@ -19,6 +28,14 @@ class Elasticsearch < Formula
 
     # Install everything else into package directory
     prefix.install Dir['*']
+
+    # Remove unnecessary files
+    rm_f Dir["#{prefix}/lib/sigar/*"]
+    if build.head?
+      rm_rf "#{prefix}/pom.xml"
+      rm_rf "#{prefix}/src/"
+      rm_rf "#{prefix}/target/"
+    end
 
     # Set up ElasticSearch for local development:
     inreplace "#{prefix}/config/elasticsearch.yml" do |s|
